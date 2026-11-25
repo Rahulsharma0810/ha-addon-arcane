@@ -1,0 +1,70 @@
+configuration:
+  encryption_key:
+    name: Encryption key
+    description: >-
+      Secret used by Arcane to encrypt stored credentials (registry logins,
+      remote environments, API tokens). Leave EMPTY to auto-generate a random
+      32-character key on first start, which is then kept in the add-on's
+      persistent storage and included in backups. To set your own, use exactly
+      32 random characters, e.g. generate one with `openssl rand -hex 16`.
+      Example: 9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. WARNING: changing this later
+      makes already-stored secrets unreadable.
+  app_url:
+    name: Public URL
+    description: >-
+      The URL you use to reach Arcane. Only needed if you access it through a
+      reverse proxy or domain name; it is used for redirects and login (OIDC)
+      callbacks. Leave empty for plain LAN access. Examples:
+      http://192.168.0.2:3552 or https://arcane.example.com
+  timezone:
+    name: Timezone override
+    description: >-
+      Leave EMPTY (recommended) to use the timezone configured in Home
+      Assistant (Settings > System > General). Only set this if Arcane should
+      use a different timezone, e.g. Asia/Kolkata or Europe/London. Affects
+      scheduled jobs and log timestamps.
+  log_level:
+    name: Log level
+    description: >-
+      Verbosity of the Arcane log. Use `info` normally and `debug` when
+      troubleshooting.
+  projects_directory:
+    name: Projects directory
+    description: >-
+      Where Arcane stores Docker Compose projects. Must be under /share so
+      files survive add-on updates and are reachable by the Docker host.
+      Default: /share/arcane/projects
+  default_admin_username:
+    name: Initial admin username
+    description: >-
+      Username of the admin account created on first start. Leave empty to use
+      `admin`. Ignored once the account exists.
+  default_admin_password:
+    name: Initial admin password
+    description: >-
+      Password of the admin account created on first start. Leave empty to have
+      Arcane generate one (shown in the add-on Log tab on first start). You are
+      asked to change it at first login. Ignored once the account exists.
+  admin_static_api_key:
+    name: Admin API key
+    description: >-
+      Optional fixed API key with admin rights, created at startup so tools
+      such as the Arcane Home Assistant integration can connect without
+      creating a key by hand. Must start with `arc_`, e.g.
+      arc_homeassistant_9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. Treat it like a
+      password; leave empty if you prefer to create keys in the Arcane UI
+      (Settings > API Keys).
+  trusted_proxies:
+    name: Trusted proxies
+    description: >-
+      Comma-separated IP/CIDR list of reverse proxies whose X-Forwarded-*
+      headers Arcane should trust (needed for correct client IP and HTTPS
+      detection behind Nginx Proxy Manager, Caddy, Traefik, Cloudflare Tunnel).
+      Leave empty when not using a proxy. Example: 172.30.33.0/24,192.168.0.10/32
+  env_vars:
+    name: Additional environment variables
+    description: >-
+      Extra Arcane environment variables as name/value pairs, for settings not
+      listed above. Example: name ARCANE_JWT_REFRESH_EXPIRY, value 72h.
+network:
+  3552/tcp: Arcane web UI and API (default 3552)

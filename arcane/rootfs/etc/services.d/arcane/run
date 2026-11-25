@@ -45,6 +45,18 @@ for name in $(bashio::config 'env_vars|keys'); do
   export "${key}=${value}"
 done
 
+if ! bashio::config.has_value 'default_admin_password'; then
+  (
+    for _ in $(seq 1 60); do
+      if [[ -s /data/initial-admin-password ]]; then
+        bashio::log.warning "Initial admin login: user 'admin', password '$(cat /data/initial-admin-password)' (you must change it at first login)"
+        break
+      fi
+      sleep 2
+    done
+  ) &
+fi
+
 bashio::log.info "Starting Arcane on port ${ARCANE_PORT}"
 cd /app
 exec /app/arcane
