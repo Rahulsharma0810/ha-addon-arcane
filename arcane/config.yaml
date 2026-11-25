@@ -1,5 +1,5 @@
 name: Arcane
-version: "1.1.0"
+version: "1.1.1"
 slug: arcane
 description: Modern Docker management UI. Manage containers, Compose projects, images, volumes and networks.
 url: https://github.com/Rahulsharma0810/ha-addon-arcane

@@ -12,7 +12,20 @@ ln -sfn /share /mnt/data/supervisor/share
 
 KEY_FILE=/data/.encryption_key
 if bashio::config.has_value 'encryption_key'; then
-  export ARCANE_ENCRYPTION_KEY="$(bashio::config 'encryption_key')"
+  OPTION_KEY="$(bashio::config 'encryption_key')"
+  if [[ ${#OPTION_KEY} -lt 32 ]]; then
+    bashio::log.fatal "encryption_key must be at least 32 characters. Clear the option to use an auto-generated key."
+    exit 1
+  fi
+  if [[ -s "${KEY_FILE}" && "${OPTION_KEY}" != "$(cat "${KEY_FILE}")" && -s /data/arcane.db ]]; then
+    bashio::log.fatal "encryption_key differs from the key this database was created with (/data/.encryption_key). Changing it breaks logins. Clear the option, or restore the original value."
+    exit 1
+  fi
+  if [[ ! -s "${KEY_FILE}" ]]; then
+    printf '%s' "${OPTION_KEY}" > "${KEY_FILE}"
+    chmod 600 "${KEY_FILE}"
+  fi
+  export ARCANE_ENCRYPTION_KEY="${OPTION_KEY}"
 else
   if [[ ! -s "${KEY_FILE}" ]]; then
     bashio::log.info "Generating encryption key (stored in /data)"

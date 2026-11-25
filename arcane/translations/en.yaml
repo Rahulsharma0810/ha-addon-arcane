@@ -4,11 +4,11 @@ configuration:
     description: >-
       Secret used by Arcane to encrypt stored credentials (registry logins,
       remote environments, API tokens). Leave EMPTY to auto-generate a random
-      32-character key on first start, which is then kept in the add-on's
-      persistent storage and included in backups. To set your own, use exactly
-      32 random characters, e.g. generate one with `openssl rand -hex 16`.
-      Example: 9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. WARNING: changing this later
-      makes already-stored secrets unreadable.
+      key on first start, which is then kept in the add-on's persistent storage
+      and included in backups (recommended). To set your own, use at least 32
+      random characters, e.g. from `openssl rand -hex 16`. Example:
+      9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. This is NOT an API key, do not use an
+      arc_ value. WARNING: never change it after first start or logins fail.
   app_url:
     name: Public URL
     description: >-
@@ -38,7 +38,7 @@ configuration:
     name: Initial admin username
     description: >-
       Username of the admin account created on first start. Leave empty to use
-      `admin`. Ignored once the account exists.
+      `arcane`. Only used on the very first start; ignored once any account exists. Must also match your admin user when using the Admin API key option.
   default_admin_password:
     name: Initial admin password
     description: >-
@@ -50,10 +50,12 @@ configuration:
     description: >-
       Optional fixed API key with admin rights, created at startup so tools
       such as the Arcane Home Assistant integration can connect without
-      creating a key by hand. Must start with `arc_`, e.g.
-      arc_homeassistant_9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. Treat it like a
-      password; leave empty if you prefer to create keys in the Arcane UI
-      (Settings > API Keys).
+      creating a key by hand. Must start with `arc_` plus at least 8 more
+      characters, e.g. arc_homeassistant_9f2c4b7a1e8d03a56b7c9d1e2f40a3b8. It is
+      attached to the admin user named in Initial admin username, so set that to
+      your real admin user. Send it as the X-Api-Key header. Clearing it deletes
+      the key. Treat it like a password; leave empty to create keys in the
+      Arcane UI (Settings > API Keys).
   trusted_proxies:
     name: Trusted proxies
     description: >-
