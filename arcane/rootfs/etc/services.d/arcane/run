@@ -1,0 +1,50 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+
+# Persist Arcane data in the add-on's /data (included in HA backups)
+rm -rf /app/data
+ln -sfn /data /app/data
+
+# Compose bind mounts are resolved by the host Docker daemon, so make the
+# host path of /share resolve identically inside this container.
+mkdir -p /mnt/data/supervisor
+ln -sfn /share /mnt/data/supervisor/share
+
+KEY_FILE=/data/.encryption_key
+if bashio::config.has_value 'encryption_key'; then
+  export ARCANE_ENCRYPTION_KEY="$(bashio::config 'encryption_key')"
+else
+  if [[ ! -s "${KEY_FILE}" ]]; then
+    bashio::log.info "Generating encryption key (stored in /data)"
+    tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32 > "${KEY_FILE}"
+    chmod 600 "${KEY_FILE}"
+  fi
+  export ARCANE_ENCRYPTION_KEY="$(cat "${KEY_FILE}")"
+fi
+
+if bashio::config.has_value 'timezone'; then
+  export TZ="$(bashio::config 'timezone')"
+else
+  export TZ="$(bashio::info.timezone)"
+fi
+
+PROJECTS="$(bashio::config 'projects_directory')"
+mkdir -p "${PROJECTS}"
+export ARCANE_PROJECTS_DIRECTORY="${PROJECTS/#\/share/\/mnt\/data\/supervisor\/share}"
+export ARCANE_LOG_LEVEL="$(bashio::config 'log_level')"
+
+bashio::config.has_value 'app_url' && export ARCANE_APP_URL="$(bashio::config 'app_url')"
+bashio::config.has_value 'trusted_proxies' && export ARCANE_TRUSTED_PROXIES="$(bashio::config 'trusted_proxies')"
+bashio::config.has_value 'admin_static_api_key' && export ARCANE_ADMIN_STATIC_API_KEY="$(bashio::config 'admin_static_api_key')"
+bashio::config.has_value 'default_admin_username' && export ARCANE_DEFAULT_ADMIN_USERNAME="$(bashio::config 'default_admin_username')"
+bashio::config.has_value 'default_admin_password' && export ARCANE_DEFAULT_ADMIN_PASSWORD="$(bashio::config 'default_admin_password')"
+
+for name in $(bashio::config 'env_vars|keys'); do
+  key="$(bashio::config "env_vars[${name}].name")"
+  value="$(bashio::config "env_vars[${name}].value")"
+  export "${key}=${value}"
+done
+
+bashio::log.info "Starting Arcane on port ${ARCANE_PORT}"
+cd /app
+exec /app/arcane

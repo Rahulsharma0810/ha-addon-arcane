@@ -1,0 +1,46 @@
+name: Arcane
+version: "1.0.0"
+slug: arcane
+description: Modern Docker management UI. Manage containers, Compose projects, images, volumes and networks.
+url: https://github.com/Rahulsharma0810/ha-addon-arcane
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+docker_api: true
+hassio_api: true
+map:
+  - share:rw
+ports:
+  3552/tcp: 3552
+ports_description:
+  3552/tcp: Arcane web UI and API
+webui: "http://[HOST]:[PORT:3552]"
+panel_icon: mdi:docker
+panel_admin: true
+options:
+  encryption_key: ""
+  app_url: ""
+  timezone: ""
+  log_level: info
+  projects_directory: /share/arcane/projects
+  default_admin_username: ""
+  default_admin_password: ""
+  admin_static_api_key: ""
+  trusted_proxies: ""
+  env_vars: []
+schema:
+  encryption_key: password?
+  app_url: str?
+  timezone: str?
+  log_level: list(debug|info|warn|error)
+  projects_directory: str
+  default_admin_username: str?
+  default_admin_password: password?
+  admin_static_api_key: password?
+  trusted_proxies: str?
+  env_vars:
+    - name: match(^[A-Za-z_][A-Za-z0-9_]*$)
+      value: str?
